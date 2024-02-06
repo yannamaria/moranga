@@ -1,31 +1,74 @@
 import express from "express"
-import { db, firestore} from '../banco_de_dados/firebase';
+import { db, firestore } from '../banco_de_dados/firebase';
 
 const app = express();
- app.use(express.json())
-app.get("/", (req, res)=>{
+app.use(express.json())
+app.get("/", (req, res) => {
     res.send("bem vindo a minha primeira API");
 })
 
-app.post("/usuario", async(req, res)=>{
+app.post("/usuario", async (req, res) => {
     const nome = req.body.nome;
-    const email = req .body.email
+    const email = req.body.email
     const telefone = req.body.telefone
 
-    try{
-        const docRef= await firestore. addDoc(firestore. collection(db,"usuario"),{
+    try {
+        const docRef = await firestore.addDoc(firestore.collection(db, "usuario"), {
             nome: nome,
             email: email,
             telefone: telefone,
-            
+
         })
         res.send("usuario adicionado com sucesso:" + docRef.id);
-    }catch(e){
+    } catch (e) {
         console.log(e)
         res.status(500).send(e)
     }
-    
+
 })
-app.listen(3000, function(){
+
+app.get("/listarUsuarios", async (req, res) => {
+
+
+    try {
+        const usuarios = await firestore.getDocs(firestore.collection(db, 'usuario'))
+        const listaUsuarios = usuarios.docs.map(data => ({
+            id: data.id,
+            ...data.data()
+        }))
+
+
+
+
+
+        res.send(listaUsuarios)
+    } catch (error) {
+        console.log("Erro ao buscar os usuarios");
+        res.send(error)
+    }
+
+
+
+})
+
+
+app.put('/atualizarUsuario/:id',async(req,res)=>{
+    const id = req.params.id
+    const nome = req.body.nome
+
+    try {
+        await firestore.updateDoc(firestore.doc(db,"usuario",id),{
+            nome: nome,
+        })
+        res.send('Usuario atualizado com sucesso!')
+    } catch (e) {
+        console.log('erro ao atualizar usuario:'+ e)
+        
+        res.status(500).send('erro ao atualizar usuario:'+ e)
+    }
+})
+
+
+app.listen(3000, function () {
     console.log('servidor rodado na porta http://localhost:3000')
 });
