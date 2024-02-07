@@ -67,7 +67,17 @@ app.put('/atualizarUsuario/:id',async(req,res)=>{
         res.status(500).send('erro ao atualizar usuario:'+ e)
     }
 })
-
+app.delete('/deletarUsuario/:id', async (req, res)=>{
+    const id = req.params. id
+    
+    try {
+        await firestore.deleteDoc(firestore.doc(db,"usuarios",id))
+        res.send("Usuario deletado com sucesso!")
+    } catch (e) {
+        console.log('Erro ao deletar usuaro:'+e)
+        res.status(500).send('Erro ao deletar usuaro:'+e)
+    }
+})
 
 app.listen(3000, function () {
     console.log('servidor rodado na porta http://localhost:3000')
